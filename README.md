@@ -1,1 +1,1 @@
-# datahub-ingestion
+# datahub-generic-ingestion
