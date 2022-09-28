@@ -14,6 +14,7 @@ object Main extends App with Logging{
   implicit val spark: SparkSession = SparkSession.builder()
     .master("local[1]")
     .appName("datahub-generic-ingestion")
+    .config("spark.mongodb.write.connection.uri", "mongodb://127.0.0.1/test.myCollection")
     .getOrCreate();
 
 
