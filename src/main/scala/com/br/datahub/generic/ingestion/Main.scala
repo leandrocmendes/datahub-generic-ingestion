@@ -17,9 +17,9 @@ object Main extends App with Logging{
     .getOrCreate();
 
 
-  log.info("APP Name :" + spark.sparkContext.appName)
-  log.info("Deploy Mode :" + spark.sparkContext.deployMode)
-  log.info("Master :" + spark.sparkContext.master)
+  println("APP Name :" + spark.sparkContext.appName)
+  println("Deploy Mode :" + spark.sparkContext.deployMode)
+  println("Master :" + spark.sparkContext.master)
 
 //  val propertiesFile = args(0)
 

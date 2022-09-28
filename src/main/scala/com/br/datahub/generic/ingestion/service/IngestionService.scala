@@ -40,11 +40,19 @@ object IngestionService {
   def makeIngestion(ingestionParameter: IngestionParameter)(implicit sparkSession: SparkSession): Unit = {
     val df: DataFrame = {
       if(ingestionParameter.source.typeIngestion.toLowerCase() == "csv"){
-        readCsv(ingestionParameter.source.config.path, ingestionParameter.source.config.separator)
+        readCsv(
+          ingestionParameter.source.config.path,
+          ingestionParameter.source.config.separator,
+          ingestionParameter.source.config.header
+        )
       }else if(ingestionParameter.source.typeIngestion.toLowerCase() == "parquet"){
-        readParquet(ingestionParameter.source.config.path)
+        readParquet(
+          ingestionParameter.source.config.path
+        )
       }else if(ingestionParameter.source.typeIngestion.toLowerCase() == "avro"){
-        readAvro(ingestionParameter.source.config.path)
+        readAvro(
+          ingestionParameter.source.config.path
+        )
       }else if (ingestionParameter.source.typeIngestion.toLowerCase() == "mysql"){
         readJdbc(
           ingestionParameter.source.config.host,
