@@ -2,7 +2,7 @@ name: Leitura de csv de orders
 mode: APPEND
 owner: leandro costa
 source:
-  typeIngestion: PARQUET
+  typeIngestion: CSV
   config:
     path: /opt/spark-data/orders.csv
     separator: ";"
