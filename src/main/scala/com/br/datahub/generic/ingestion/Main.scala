@@ -8,23 +8,29 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import org.apache.spark.SparkFiles
+
+import scala.io.Source
 
 
 object Main extends App with Logging{
   implicit val spark: SparkSession = SparkSession.builder()
-    .master("local[1]")
-    .appName("datahub-generic-ingestion")
-    .config("spark.mongodb.write.connection.uri", "mongodb://127.0.0.1/test.myCollection")
-    .getOrCreate();
+    .getOrCreate()
 
 
   println("APP Name :" + spark.sparkContext.appName)
   println("Deploy Mode :" + spark.sparkContext.deployMode)
   println("Master :" + spark.sparkContext.master)
 
-//  val propertiesFile = args(0)
+  val propertiesFile = args(0)
 
-  val yamlExample = "name: Leitura de csv de orders\nmode: APPEND\nowner: leandro costa\nsource:\n    typeIngestion: CSV\n    config:\n        path: /ingestion/bronze/orders.csv\n        separator: \";\"\n        header: true\n\ndestination:\n    typeIngestion: MYSQL\n    config:\n        host: ${MSSQL_HOST}\n        username: ${MSSQL_USERNAME}\n        password: ${MSSQL_PASSWORD}\n        table: Orders"
+  //val yamlExample = "name: Leitura de csv de orders\nmode: APPEND\nowner: leandro costa\nsource:\n    typeIngestion: CSV\n    config:\n        path: /ingestion/bronze/orders.csv\n        separator: \";\"\n        header: true\n\ndestination:\n    typeIngestion: MYSQL\n    config:\n        host: ${MSSQL_HOST}\n        username: ${MSSQL_USERNAME}\n        password: ${MSSQL_PASSWORD}\n        table: Orders"
+
+  val yamlConfiguration = SparkFiles.get(propertiesFile)
+
+  val strYaml = Source.fromFile(yamlConfiguration).mkString
+
+  println(strYaml)
 
   def convertYamlToJson(yaml: String): String = {
     val yamlReader = new ObjectMapper(new YAMLFactory)
@@ -33,7 +39,7 @@ object Main extends App with Logging{
     jsonWriter.writeValueAsString(obj)
   }
 
-  println(convertYamlToJson(yamlExample))
+  println(convertYamlToJson(strYaml))
 
   val mapper = new ObjectMapper() with ScalaObjectMapper
   mapper.registerModule(DefaultScalaModule)
@@ -42,7 +48,7 @@ object Main extends App with Logging{
     mapper.readValue[T](json)
   }
 
-  val ingestionObject: IngestionParameter = fromJson[IngestionParameter](convertYamlToJson(yamlExample))
+  val ingestionObject: IngestionParameter = fromJson[IngestionParameter](convertYamlToJson(strYaml))
 
   println(ingestionObject)
 

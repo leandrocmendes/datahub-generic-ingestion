@@ -123,3 +123,8 @@ replay_pid*
 /.idea/vcs.xml
 /.idea/jarRepositories.xml
 /.idea/scala_compiler.xml
+/docker/spark/data/mysql/
+/docker/spark/config/
+/target/classes.timestamp
+/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+/target/maven-archiver/pom.properties

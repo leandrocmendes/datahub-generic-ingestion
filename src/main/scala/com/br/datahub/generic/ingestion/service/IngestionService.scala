@@ -38,7 +38,8 @@ object IngestionService {
   }
 
   def writeJdbc(df:DataFrame, host: String, user: String, password: String, tableName: String)(implicit sparkSession: SparkSession): Unit = {
-    val prop = new Properties();
+    val prop = new Properties()
+    prop.put("driver", "com.mysql.cj.jdbc.Driver")
     prop.put("user", user)
     prop.put("password", password)
 
