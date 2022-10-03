@@ -37,7 +37,14 @@ object IngestionService {
       .jdbc(host, tableName,prop)
   }
 
-  def writeJdbc(df:DataFrame, host: String, user: String, password: String, tableName: String)(implicit sparkSession: SparkSession): Unit = {
+  def writeJdbc(df:DataFrame,
+                host: String,
+                user: String,
+                password: String,
+                tableName: String,
+                mode: String)
+               (implicit sparkSession: SparkSession): Unit = {
+
     val prop = new Properties()
     prop.put("driver", "com.mysql.cj.jdbc.Driver")
     prop.put("user", user)
@@ -45,14 +52,16 @@ object IngestionService {
 
     df
       .write
+      .mode(mode)
       .jdbc(host, tableName, prop)
   }
 
-  def writeMongoDB(df: DataFrame)(implicit sparkSession: SparkSession) = {
+  def writeMongoDB(df: DataFrame, mode: String)(implicit sparkSession: SparkSession): Unit = {
     df
-    .write
-    .format("mongodb")
-    .save()
+      .write
+      .mode(mode)
+      .format("mongodb")
+      .save()
   }
 
   def makeIngestion(ingestionParameter: IngestionParameter)(implicit sparkSession: SparkSession): Unit = {
@@ -92,11 +101,13 @@ object IngestionService {
         ingestionParameter.destination.config.host,
         ingestionParameter.destination.config.username,
         ingestionParameter.destination.config.password,
-        ingestionParameter.destination.config.table
+        ingestionParameter.destination.config.table,
+        ingestionParameter.mode
       )
     }else if (ingestionParameter.destination.typeIngestion.toLowerCase() == "mongo"){
       writeMongoDB(
-        df
+        df,
+        ingestionParameter.mode
       )
     }
   }

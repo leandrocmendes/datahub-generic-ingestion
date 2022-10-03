@@ -12,11 +12,9 @@ import org.apache.spark.SparkFiles
 
 import scala.io.Source
 
-
 object Main extends App with Logging{
   implicit val spark: SparkSession = SparkSession.builder()
     .getOrCreate()
-
 
   println("APP Name :" + spark.sparkContext.appName)
   println("Deploy Mode :" + spark.sparkContext.deployMode)
@@ -29,8 +27,6 @@ object Main extends App with Logging{
   val yamlConfiguration = SparkFiles.get(propertiesFile)
 
   val strYaml = Source.fromFile(yamlConfiguration).mkString
-
-  println(strYaml)
 
   def convertYamlToJson(yaml: String): String = {
     val yamlReader = new ObjectMapper(new YAMLFactory)
@@ -50,8 +46,5 @@ object Main extends App with Logging{
 
   val ingestionObject: IngestionParameter = fromJson[IngestionParameter](convertYamlToJson(strYaml))
 
-  println(ingestionObject)
-
   IngestionService.makeIngestion(ingestionObject)
-
 }

@@ -128,3 +128,5 @@ replay_pid*
 /target/classes.timestamp
 /target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
 /target/maven-archiver/pom.properties
+
+*.crc

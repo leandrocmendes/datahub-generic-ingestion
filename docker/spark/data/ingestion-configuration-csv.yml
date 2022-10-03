@@ -1,8 +1,8 @@
 name: Leitura de csv de orders
-mode: APPEND
+mode: OVERWRITE
 owner: leandro costa
 source:
-  typeIngestion: PARQUET
+  typeIngestion: CSV
   config:
     path: /opt/spark-data/orders.csv
     separator: ";"
@@ -11,7 +11,7 @@ source:
 destination:
   typeIngestion: MYSQL
   config:
-    host: jdbc:mysql://aed586c28058:3306/test?enabledTLSProtocols=TLSv1.2
+    host: jdbc:mysql://spark_mysql_1:3306/test?enabledTLSProtocols=TLSv1.2
     username: root
     password: admin
     table: OrdersCsv
