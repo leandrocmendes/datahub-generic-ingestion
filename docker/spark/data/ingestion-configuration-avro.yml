@@ -1,10 +1,10 @@
-name: Leitura de parquet de orders
-mode: APPEND
+name: Leitura de avro de orders
+mode: OVERWRITE
 owner: leandro costa
 source:
-  typeIngestion: PARQUET
+  typeIngestion: AVRO
   config:
-    path: /opt/spark-data/parquet_orders
+    path: /opt/spark-data/avro_orders/orders.avro
 
 destination:
   typeIngestion: MYSQL
@@ -12,4 +12,4 @@ destination:
     host: jdbc:mysql://spark_mysql_1:3306/test?enabledTLSProtocols=TLSv1.2
     username: root
     password: admin
-    table: OrdersParquet
+    table: OrdersAvro
