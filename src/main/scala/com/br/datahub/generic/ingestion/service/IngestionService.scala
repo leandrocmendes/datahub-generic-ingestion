@@ -61,6 +61,9 @@ object IngestionService {
   def writeMongoDB(df: DataFrame, uri: String, database: String, collection: String, mode: String)(implicit sparkSession: SparkSession): Unit = {
     df
       .write
+      .option("spark.mongodb.output.uri", uri)
+      .option("spark.mongodb.output.database", database)
+      .option("spark.mongodb.output.collection", collection)
       .mode(mode)
       .format("com.mongodb.spark.sql.DefaultSource")
       .save()

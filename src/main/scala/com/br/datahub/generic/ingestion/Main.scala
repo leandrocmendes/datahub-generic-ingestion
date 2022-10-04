@@ -14,7 +14,7 @@ import org.apache.spark.SparkFiles
 import scala.io.Source
 
 object Main extends App with Logging{
-  implicit var spark: SparkSession = getSparkSession()
+  implicit val spark: SparkSession = getSparkSession()
 
   println("Starting Ingestion Pipeline...")
   println("App Name :" + spark.sparkContext.appName)
@@ -35,8 +35,6 @@ object Main extends App with Logging{
 
     val ingestionObject: IngestionParameter = fromJson[IngestionParameter](convertYamlToJson(strYaml))
 
-    spark = getSparkSession(ingestionObject)
-
     IngestionService.makeIngestion(ingestionObject)
   }catch {
     case ex: Exception =>
@@ -51,21 +49,11 @@ object Main extends App with Logging{
     jsonWriter.writeValueAsString(obj)
   }
 
-  def getSparkSession(ingestionObject: IngestionParameter = null): SparkSession = {
-    val spark = if(ingestionObject == null) {
-      SparkSession.builder().enableHiveSupport().getOrCreate()
-    } else{
-      if(ingestionObject.destination.typeIngestion.toLowerCase.equals(ApplicationConstants.IngestionTypes.MONGODB)){
-        SparkSession.builder()
-          .config("spark.mongodb.output.uri", ingestionObject.destination.config.uri)
-          .config("spark.mongodb.output.database", ingestionObject.destination.config.database)
-          .config("spark.mongodb.output.collection", ingestionObject.destination.config.table)
-          .enableHiveSupport()
-          .getOrCreate()
-      }else{
-        SparkSession.builder().enableHiveSupport().getOrCreate()
-      }
-    }
+  def getSparkSession(): SparkSession = {
+    val spark =  SparkSession.builder()
+      .enableHiveSupport()
+      .getOrCreate()
+
     spark
   }
 }
