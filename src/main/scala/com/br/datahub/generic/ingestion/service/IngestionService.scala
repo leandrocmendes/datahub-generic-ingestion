@@ -1,6 +1,8 @@
 package com.br.datahub.generic.ingestion.service
 
+import com.br.datahub.generic.ingestion.constants.ApplicationConstants
 import com.br.datahub.generic.ingestion.model.IngestionParameter
+import org.apache.spark.sql.SparkSession.setActiveSession
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import java.util.Properties
@@ -56,31 +58,35 @@ object IngestionService {
       .jdbc(host, tableName, prop)
   }
 
-  def writeMongoDB(df: DataFrame, mode: String)(implicit sparkSession: SparkSession): Unit = {
+  def writeMongoDB(df: DataFrame, uri: String, database: String, collection: String, mode: String)(implicit sparkSession: SparkSession): Unit = {
+
+
+    setActiveSession(sparkSession)
+
     df
       .write
       .mode(mode)
-      .format("mongodb")
+      .format("com.mongodb.spark.sql.DefaultSource")
       .save()
   }
 
   def makeIngestion(ingestionParameter: IngestionParameter)(implicit sparkSession: SparkSession): Unit = {
     val df: DataFrame = {
-      if(ingestionParameter.source.typeIngestion.toLowerCase() == "csv"){
+      if(ingestionParameter.source.typeIngestion.toLowerCase() == ApplicationConstants.IngestionTypes.CSV){
         readCsv(
           ingestionParameter.source.config.path,
           ingestionParameter.source.config.separator,
           ingestionParameter.source.config.header
         )
-      }else if(ingestionParameter.source.typeIngestion.toLowerCase() == "parquet"){
+      }else if(ingestionParameter.source.typeIngestion.toLowerCase() == ApplicationConstants.IngestionTypes.PARQUET){
         readParquet(
           ingestionParameter.source.config.path
         )
-      }else if(ingestionParameter.source.typeIngestion.toLowerCase() == "avro"){
+      }else if(ingestionParameter.source.typeIngestion.toLowerCase() == ApplicationConstants.IngestionTypes.AVRO){
         readAvro(
           ingestionParameter.source.config.path
         )
-      }else if (ingestionParameter.source.typeIngestion.toLowerCase() == "mysql"){
+      }else if (ingestionParameter.source.typeIngestion.toLowerCase() == ApplicationConstants.IngestionTypes.MYSQL){
         readJdbc(
           ingestionParameter.source.config.host,
           ingestionParameter.source.config.username,
@@ -95,7 +101,7 @@ object IngestionService {
     df.printSchema()
     df.show()
 
-    if(ingestionParameter.destination.typeIngestion.toLowerCase() == "mysql"){
+    if(ingestionParameter.destination.typeIngestion.toLowerCase() == ApplicationConstants.IngestionTypes.MYSQL){
       writeJdbc(
         df,
         ingestionParameter.destination.config.host,
@@ -104,9 +110,12 @@ object IngestionService {
         ingestionParameter.destination.config.table,
         ingestionParameter.mode
       )
-    }else if (ingestionParameter.destination.typeIngestion.toLowerCase() == "mongo"){
+    }else if (ingestionParameter.destination.typeIngestion.toLowerCase() == ApplicationConstants.IngestionTypes.MONGODB){
       writeMongoDB(
         df,
+        ingestionParameter.destination.config.uri,
+        ingestionParameter.destination.config.database,
+        ingestionParameter.destination.config.table,
         ingestionParameter.mode
       )
     }

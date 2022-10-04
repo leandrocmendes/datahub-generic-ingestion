@@ -79,12 +79,6 @@
             <version>${spark.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.mongodb.spark</groupId>
-            <artifactId>mongo-spark-connector</artifactId>
-            <version>10.0.4</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
             <groupId>mysql</groupId>

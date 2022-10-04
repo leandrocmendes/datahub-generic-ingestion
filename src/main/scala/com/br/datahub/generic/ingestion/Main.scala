@@ -1,5 +1,6 @@
 package com.br.datahub.generic.ingestion
 
+import com.br.datahub.generic.ingestion.constants.ApplicationConstants
 import com.br.datahub.generic.ingestion.model.IngestionParameter
 import com.br.datahub.generic.ingestion.service.IngestionService
 import org.apache.spark.internal.Logging
@@ -13,21 +14,36 @@ import org.apache.spark.SparkFiles
 import scala.io.Source
 
 object Main extends App with Logging{
-  implicit val spark: SparkSession = SparkSession.builder()
-    .getOrCreate()
+  implicit var spark: SparkSession = getSparkSession()
 
-  println("APP Name :" + spark.sparkContext.appName)
-  println("Deploy Mode :" + spark.sparkContext.deployMode)
-  println("Master :" + spark.sparkContext.master)
+  println("Starting Ingestion Pipeline...")
+  println("App Name :" + spark.sparkContext.appName)
 
-  val propertiesFile = args(0)
+  try{
+    val propertiesFile = args(0)
 
-  //val yamlExample = "name: Leitura de csv de orders\nmode: APPEND\nowner: leandro costa\nsource:\n    typeIngestion: CSV\n    config:\n        path: /ingestion/bronze/orders.csv\n        separator: \";\"\n        header: true\n\ndestination:\n    typeIngestion: MYSQL\n    config:\n        host: ${MSSQL_HOST}\n        username: ${MSSQL_USERNAME}\n        password: ${MSSQL_PASSWORD}\n        table: Orders"
+    val yamlConfiguration = SparkFiles.get(propertiesFile)
 
-  val yamlConfiguration = SparkFiles.get(propertiesFile)
+    val strYaml = Source.fromFile(yamlConfiguration).mkString
 
-  val strYaml = Source.fromFile(yamlConfiguration).mkString
+    val mapper = new ObjectMapper() with ScalaObjectMapper
+    mapper.registerModule(DefaultScalaModule)
 
+    def fromJson[T](json: String)(implicit m: Manifest[T]): T = {
+      mapper.readValue[T](json)
+    }
+
+    val ingestionObject: IngestionParameter = fromJson[IngestionParameter](convertYamlToJson(strYaml))
+
+    spark = getSparkSession(ingestionObject)
+
+    IngestionService.makeIngestion(ingestionObject)
+  }catch {
+    case ex: Exception =>
+      logError("Job Failed")
+      ex.printStackTrace()
+      throw ex
+  }
   def convertYamlToJson(yaml: String): String = {
     val yamlReader = new ObjectMapper(new YAMLFactory)
     val obj = yamlReader.readValue(yaml, classOf[Any])
@@ -35,16 +51,21 @@ object Main extends App with Logging{
     jsonWriter.writeValueAsString(obj)
   }
 
-  println(convertYamlToJson(strYaml))
-
-  val mapper = new ObjectMapper() with ScalaObjectMapper
-  mapper.registerModule(DefaultScalaModule)
-
-  def fromJson[T](json: String)(implicit m: Manifest[T]): T = {
-    mapper.readValue[T](json)
+  def getSparkSession(ingestionObject: IngestionParameter = null): SparkSession = {
+    val spark = if(ingestionObject == null) {
+      SparkSession.builder().enableHiveSupport().getOrCreate()
+    } else{
+      if(ingestionObject.destination.typeIngestion.toLowerCase.equals(ApplicationConstants.IngestionTypes.MONGODB)){
+        SparkSession.builder()
+          .config("spark.mongodb.output.uri", ingestionObject.destination.config.uri)
+          .config("spark.mongodb.output.database", ingestionObject.destination.config.database)
+          .config("spark.mongodb.output.collection", ingestionObject.destination.config.table)
+          .enableHiveSupport()
+          .getOrCreate()
+      }else{
+        SparkSession.builder().enableHiveSupport().getOrCreate()
+      }
+    }
+    spark
   }
-
-  val ingestionObject: IngestionParameter = fromJson[IngestionParameter](convertYamlToJson(strYaml))
-
-  IngestionService.makeIngestion(ingestionObject)
 }
