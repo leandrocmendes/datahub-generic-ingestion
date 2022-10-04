@@ -59,10 +59,6 @@ object IngestionService {
   }
 
   def writeMongoDB(df: DataFrame, uri: String, database: String, collection: String, mode: String)(implicit sparkSession: SparkSession): Unit = {
-
-
-    setActiveSession(sparkSession)
-
     df
       .write
       .mode(mode)
