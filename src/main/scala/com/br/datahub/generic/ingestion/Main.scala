@@ -1,6 +1,5 @@
 package com.br.datahub.generic.ingestion
 
-import com.br.datahub.generic.ingestion.constants.ApplicationConstants
 import com.br.datahub.generic.ingestion.model.IngestionParameter
 import com.br.datahub.generic.ingestion.service.IngestionService
 import org.apache.spark.internal.Logging
