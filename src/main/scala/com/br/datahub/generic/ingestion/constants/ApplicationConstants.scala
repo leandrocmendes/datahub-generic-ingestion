@@ -5,7 +5,7 @@ object ApplicationConstants {
     val CSV = "csv"
     val PARQUET = "parquet"
     val AVRO = "avro"
-    val MYSQL= "mysql"
+    val JDBC= "jdbc"
     val MONGODB = "mongodb"
   }
 

@@ -34,7 +34,9 @@ object Main extends App with Logging{
 
     val ingestionObject: IngestionParameter = fromJson[IngestionParameter](convertYamlToJson(strYaml))
 
-    IngestionService.makeIngestion(ingestionObject)
+    println(ingestionObject)
+
+    IngestionService.doIngestion(ingestionObject)
   }catch {
     case ex: Exception =>
       logError("Job Failed")

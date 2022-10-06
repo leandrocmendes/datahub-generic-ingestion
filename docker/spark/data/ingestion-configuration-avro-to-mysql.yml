@@ -7,9 +7,10 @@ source:
     path: /opt/spark-data/avro_orders/orders.avro
 
 destination:
-  typeIngestion: MYSQL
+  typeIngestion: JDBC
   config:
     host: jdbc:mysql://spark_mysql_1:3306/test?enabledTLSProtocols=TLSv1.2
     username: root
     password: admin
     table: OrdersAvro
+    driver: com.mysql.cj.jdbc.Driver

@@ -2,12 +2,13 @@ name: Leitura de mysql e escrita em mongodb
 mode: OVERWRITE
 owner: leandro costa
 source:
-  typeIngestion: MYSQL
+  typeIngestion: JDBC
   config:
     host: jdbc:mysql://spark_mysql_1:3306/BI?enabledTLSProtocols=TLSv1.2
     username: root
     password: admin
     table: SALES
+    driver: com.mysql.cj.jdbc.Driver
 
 destination:
   typeIngestion: MONGODB
