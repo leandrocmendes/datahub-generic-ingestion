@@ -6,10 +6,6 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object IngestionMongoService extends IngestionType with Logging{
-  override def readData(ingestionParameter: IngestionParameter)(implicit sparkSession: SparkSession): DataFrame = {
-    throw new Exception("Only sources types JDBC, Parquet, Avro and Csv is implemented!")
-  }
-
   override def writeData(ingestionParameter: IngestionParameter, dfToInsert: DataFrame)(implicit sparkSession: SparkSession): Unit = {
     logInfo(s"Write data on MongoDb collection: ${ingestionParameter.destination.config.table}")
 
@@ -21,5 +17,9 @@ object IngestionMongoService extends IngestionType with Logging{
       .mode(ingestionParameter.mode)
       .format("com.mongodb.spark.sql.DefaultSource")
       .save()
+  }
+
+  override def readData(ingestionParameter: IngestionParameter)(implicit sparkSession: SparkSession): DataFrame = {
+    throw new Exception("Only sources types JDBC, Parquet, Avro and Csv is implemented!")
   }
 }

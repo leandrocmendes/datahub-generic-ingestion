@@ -1,5 +1,4 @@
 package com.br.datahub.generic.ingestion.model
-
 case class DataConfig(
    host: String = "",
    username: String = "",
