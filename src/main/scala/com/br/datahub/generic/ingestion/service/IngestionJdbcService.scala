@@ -1,7 +1,7 @@
 package com.br.datahub.generic.ingestion.service
 
 import com.br.datahub.generic.ingestion.interfaces.IngestionType
-import com.br.datahub.generic.ingestion.model.IngestionParameter
+import com.br.datahub.generic.ingestion.model.{DataConfig, IngestionParameter}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -25,20 +25,20 @@ object IngestionJdbcService extends IngestionType with Logging{
       )
   }
 
-  override def writeData(ingestionParameter: IngestionParameter, dfToInsert: DataFrame)(implicit sparkSession: SparkSession): Unit = {
-    logInfo(s"Write data on jdbc table: ${ingestionParameter.destination.config.table}")
+  override def writeData(config: DataConfig, dfToInsert: DataFrame, mode:String)(implicit sparkSession: SparkSession): Unit = {
+    logInfo(s"Write data on jdbc table: ${config.table}")
 
     val prop = new Properties()
-    prop.put("driver", ingestionParameter.destination.config.driver)
-    prop.put("user", ingestionParameter.destination.config.username)
-    prop.put("password", ingestionParameter.destination.config.password)
+    prop.put("driver", config.driver)
+    prop.put("user", config.username)
+    prop.put("password", config.password)
 
     dfToInsert
       .write
-      .mode(ingestionParameter.mode)
+      .mode(mode)
       .jdbc(
-        ingestionParameter.destination.config.host,
-        ingestionParameter.destination.config.table,
+        config.host,
+        config.table,
         prop
       )
   }

@@ -1,7 +1,8 @@
 package com.br.datahub.generic.ingestion.service
 
 import com.br.datahub.generic.ingestion.SparkSessionTest
-import com.br.datahub.generic.ingestion.model.{DataConfig, IngestionParameter, TypeConfig}
+import com.br.datahub.generic.ingestion.constants.ApplicationConstants
+import com.br.datahub.generic.ingestion.model.{DataConfig, IngestionParameter, LogConfig, TypeConfig}
 import com.github.simplyscala.{MongoEmbedDatabase, MongodProps}
 import org.junit.{AfterClass, Assert, BeforeClass, Test}
 
@@ -45,7 +46,7 @@ class IngestionServiceTest extends SparkSessionTest {
 
     val ingestionConf: IngestionParameter = IngestionParameter(
       name = "Test Ingestion CSV To MySQL",
-      mode = "OVERWRITE",
+      mode = ApplicationConstants.IngestionMode.OVERWRITE,
       owner = "Teste",
       source = TypeConfig(
         typeIngestion = "CSV",
@@ -63,6 +64,19 @@ class IngestionServiceTest extends SparkSessionTest {
           table = "MoviesCsv",
           driver = "org.h2.Driver"
         )
+      ),
+      logConfig = LogConfig(
+        registerLog = true,
+        typeConfig = TypeConfig(
+          typeIngestion = "JDBC",
+          config = DataConfig(
+            host = "jdbc:h2:mem:dbo;MODE=MYSQL",
+            username = "user",
+            password = "pw",
+            table = "Log",
+            driver = "org.h2.Driver"
+          )
+        ),
       )
     )
 
@@ -71,6 +85,10 @@ class IngestionServiceTest extends SparkSessionTest {
     val df = sparkSession.read.jdbc(url,"MoviesCsv",connectionProperties)
 
     Assert.assertTrue(df.count() == 30)
+
+    val dfLog = sparkSession.read.jdbc(url, "Log", connectionProperties)
+
+    Assert.assertTrue(dfLog.count() == 1)
   }
 
   @Test
@@ -89,7 +107,7 @@ class IngestionServiceTest extends SparkSessionTest {
 
     val ingestionConf: IngestionParameter = IngestionParameter(
       name = "Test Ingestion PARQUET To MySQL",
-      mode = "OVERWRITE",
+      mode = ApplicationConstants.IngestionMode.OVERWRITE,
       owner = "Teste",
       source = TypeConfig(
         typeIngestion = "PARQUET",
@@ -132,7 +150,7 @@ class IngestionServiceTest extends SparkSessionTest {
 
     val ingestionConf: IngestionParameter = IngestionParameter(
       name = "Test Ingestion AVRO To MySQL",
-      mode = "OVERWRITE",
+      mode = ApplicationConstants.IngestionMode.OVERWRITE,
       owner = "Teste",
       source = TypeConfig(
         typeIngestion = "AVRO",
@@ -165,7 +183,7 @@ class IngestionServiceTest extends SparkSessionTest {
 
     val ingestionConf: IngestionParameter = IngestionParameter(
       name = "Test Ingestion AVRO To MongoDb",
-      mode = "OVERWRITE",
+      mode = ApplicationConstants.IngestionMode.OVERWRITE,
       owner = "Teste",
       source = TypeConfig(
         typeIngestion = "AVRO",
@@ -212,7 +230,7 @@ class IngestionServiceTest extends SparkSessionTest {
 
     var ingestionConf: IngestionParameter = IngestionParameter(
       name = "Test Ingestion AVRO To MySQL",
-      mode = "OVERWRITE",
+      mode = ApplicationConstants.IngestionMode.OVERWRITE,
       owner = "Teste",
       source = TypeConfig(
         typeIngestion = "AVRO",
@@ -237,7 +255,7 @@ class IngestionServiceTest extends SparkSessionTest {
 
     ingestionConf = IngestionParameter(
       name = "Test Ingestion MySQL to MongoDB",
-      mode = "OVERWRITE",
+      mode = ApplicationConstants.IngestionMode.OVERWRITE,
       owner = "Teste",
       source = TypeConfig(
         typeIngestion = "JDBC",
